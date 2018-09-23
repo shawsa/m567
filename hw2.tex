@@ -1,0 +1,109 @@
+\documentclass[12pt]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Math
+\usepackage{fancyhdr} 
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+%\usepackage{dsfont}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Macros
+\usepackage{calc}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Commands and Custom Variables	
+\newcommand{\problem}[1]{\hspace{-4 ex} \large \textbf{Problem #1} }
+%\let\oldemptyset\emptyset
+%\let\emptyset\varnothing
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\sint}{\text{s}\kern-5pt\int}
+\newcommand{\powerset}{\mathcal{P}}
+\renewenvironment{proof}{\hspace{-4 ex} \emph{Proof}:}{\qed}
+\newcommand{\solution}{\textit{Solution}:\bigbreak}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\VV}{\mathbb{V}}
+\newcommand{\FF}{\mathbb{F}}
+\renewcommand{\Re}{\operatorname{Re}}
+\renewcommand{\Im}{\operatorname{Im}}
+
+\newcommand{\editnote}[1]{\textcolor{red}{\textbf{\MakeUppercase{#1}}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+%\doublespacing
+\allowdisplaybreaks
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Shaw \space \thepage}
+\setlength\parindent{0pt}
+\usepackage{color}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Code
+\usepackage{listings}
+\usepackage{courier}
+\lstset{
+	language=Python,
+	showstringspaces=false,
+	formfeed=newpage,
+	tabsize=4,
+	commentstyle=\itshape,
+	basicstyle=\ttfamily,
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Images
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+\usepackage{float}
+
+%tikz
+\usepackage[utf8]{inputenc}
+%\usepackage{pgfplots}
+%\usepgfplotslibrary{groupplots}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Hyperlinks
+%\usepackage{hyperref}
+%\hypersetup{
+%	colorlinks=true,
+%	linkcolor=blue,
+%	filecolor=magenta,      
+%	urlcolor=cyan,
+%}
+
+\begin{document}
+	\thispagestyle{empty}
+	
+	\begin{flushright}
+		Sage Shaw \\
+		m567 - Fall 2018 \\
+		\today
+	\end{flushright}
+	
+\begin{center}{\large \textbf{Homework 2}}\end{center}
+\bigbreak
+
+\hspace{-.5 ex}\problem{1} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\problem{2(b)} Show that the techniques differ on non-equispaced grids. 
+
+\solution
+
+\bigbreak
+
+
+
+
+\end{document}
