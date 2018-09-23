@@ -140,6 +140,8 @@ We will call this approximation $p_\text{approx}$ in the tables below and will u
 	\end{tabular}
 \end{center}
 
+Furthermore, if we perform a linear regression on the data $\{(\log(h_i), \log(e(h_i))\}_{i=3}^n$ we approximate that $p$ is $0.994341, 1.986387$, and $3.990871$; for the first, second, and third data set respectively. \bigbreak
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \problem{2(a)} Show that if we assume a uniform grid, the stencil we obtain for the approximation of $u^{\prime\prime}(x_{j+1/2})$ at the cell centers $x_{j+1/2}$ is essentially the same second order approximation we obtained in class for $u^{\prime\prime}(x_j)$ on a vertex centered grid. \bigbreak
@@ -169,10 +171,10 @@ Let $x_0 = 0, x_1 = 1, x_2 = \frac{7}{4}, \text{ and } x_3 = 3$.  Then by conven
 Our finite volume-approximation then gives us
 \begin{align*}
 	u^{\prime\prime}(x_{3/2}) &\approx \frac{1}{x_{2} - x_1} \left[ \frac{u(x_{5/2}) - u(x_{3/2})}{x_{5/2} - x_{3/2}} - \frac{u(x_{3/2}) - u(x_{1/2})}{x_{3/2} - x_{1/2}} \right] \\
-	&= \frac{4}{3} \left[ \frac{u(x_{5/2}) - u(x_{3/2})}{1} - \frac{u(x_{3/2}) - u(x_{1/2})}{5/8} \right] \\
-	&= \frac{4}{15} \left( 5u(x_{5/2}) - 5(x_{3/2}) - 8u(x_{3/2}) + 8u(x_{1/2}) \right) \\
-	&= \frac{4}{15} \left[ 5u(x_{5/2}) - 13u(x_{3/2}) + 8u(x_{1/2}) \right] \\
-	&\approx 1.333u(x_{5/2}) - 3.467u(x_{3/2}) + 1.067u(x_{1/2}) \text{.}
+	&= \frac{4}{3} \left[ \frac{u(x_{5/2}) - u(x_{3/2})}{1} - \frac{u(x_{3/2}) - u(x_{1/2})}{7/8} \right] \\
+	&= \frac{4}{21} \left( 7u(x_{5/2}) - 7(x_{3/2}) - 8u(x_{3/2}) + 8u(x_{1/2}) \right) \\
+	&= \frac{4}{21} \left[ 7u(x_{5/2}) - 16u(x_{3/2}) + 8u(x_{1/2}) \right] \\
+	&\approx 1.333u(x_{5/2}) - 3.0476u(x_{3/2}) + 1.524u(x_{1/2}) \text{.}
 \end{align*}
 
 However, our FD weights are given by Fornberg's Algorithm as
@@ -238,18 +240,18 @@ return fd1, fd2
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\problem{3(b)} Applied to the function $x^2e^{-x}$ over the interval $[0,1]$ the errors for the $L_2$ norm of first and second derivatives approximated at $N$ points for $N=8$ and doubling until $N=256$ can be seen in the table and plots below.\\
+\problem{3(b)} Applied to the function $x^2e^{-x}$ over the interval $[0,1]$ the errors for the $L_2$ norm of first and second derivatives approximated at $N$ points for $N=8$ and doubling until $N=256$ can be seen in the table and plots below. The order of convergence for each method is listed in the legend and is calculated by performing a linear regression on the log of the data for all but the first two points. \\
 
 \begin{center}
 	\begin{tabular}{|c|c|c|c|c|}
 		\hline
-		$h$&$f^\prime$ erorr&$f^\prime$ erorr order&$f^{\prime\prime}$ erorr&$f^{\prime\prime}$ erorr order\\ \hline
-		0.125&2.8053e-05&-&3.1002e-05&-\\ \hline
-		0.0625&3.0451e-06&3.2036&3.4432e-06&3.1706\\ \hline
-		0.03125&2.9927e-07&3.347&3.4287e-07&3.328\\ \hline
-		0.015625&2.7916e-08&3.4223&3.2209e-08&3.4121\\ \hline
-		0.0078125&2.5354e-09&3.4608&2.936e-09&3.4556\\ \hline
-		0.0039062&2.2717e-10&3.4803&2.7081e-10&3.4385\\ \hline
+		$h$&$f^\prime$ error &$f^\prime$ error ratio&$f^{\prime\prime}$ error&$f^{\prime\prime}$ error ratio\\ \hline
+		0.125&2.3696e-05&-&2.6188e-05&-\\ \hline
+		0.0625&1.8918e-06&3.6468&2.1392e-06&3.6138\\ \hline
+		0.03125&1.3428e-07&3.8165&1.5384e-07&3.7976\\ \hline
+		0.015625&8.9542e-09&3.9065&1.0331e-08&3.8963\\ \hline
+		0.0078125&5.7825e-10&3.9528&6.6964e-10&3.9475\\ \hline
+		0.0039062&3.674e-11&3.9763&4.3799e-11&3.9344\\ \hline
 	\end{tabular}
 \end{center}
 
@@ -259,7 +261,7 @@ return fd1, fd2
 	\centering
 \end{figure}
 
-The order of accuracy appears to be roughly $\mathcal{O}(h^{3.4})$ for both methods.
+The order of accuracy appears to be roughly $\mathcal{O}(h^{4})$ for both methods.
 \bigbreak
 
 \problem{3(c)} Using Maple the output of the provided code can be seen in the figure below.
@@ -290,7 +292,7 @@ display(err)
 \end{lstlisting}
 The output of the code is
 $$
-\frac{h^{4} \left. \frac{d^{5}}{d x^{5}} f{\left (x \right )} \right|_{\substack{ x=0 }}}{30} + O\left(h^{5}\right)
+\frac{h^{4} \left. \frac{d^{5}}{d x^{5}} f{\left (x \right )} \right|_{\substack{ x=0 }}}{30} + \mathcal{O}\left(h^{5}\right)
 $$
 confirming that the error is $\mathcal{O}(h^4)$.
 \bigbreak
@@ -318,43 +320,49 @@ display(err)
 \end{lstlisting}
 The output of the above code is
 $$
-\frac{h^{4} \left. \frac{d^{6}}{d x^{6}} f{\left (x \right )} \right|_{\substack{ x=0 }}}{20} + O\left(h^{5}\right)
+\frac{h^{4} \left. \frac{d^{6}}{d x^{6}} f{\left (x \right )} \right|_{\substack{ x=0 }}}{20} + \mathcal{O}\left(h^{5}\right)
 $$
 confirming that the error is $\mathcal{O}(h^4)$.
 \bigbreak
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\problem{4(a)} The weights for the equispaced points that approximate the derivative at $x=0$ and $x=-1+\tfrac{3}{14}$ are given in the table below and seen in figure (\ref{equ_weights}). 
-\begin{center}
-	\begin{tabular}{|c|c|c|}
-		\hline
-		$x$&weights for $z=0.00$&weights for $z=-\tfrac{11}{14}$\\ \hline
-		-1&-0.00029138&0.097975\\ \hline
-		-0.85714&0.0047591&-6.2847\\ \hline
-		-0.71429&-0.037121&1.4593\\ \hline
-		-0.57143&0.18561&16.859\\ \hline
-		-0.42857&-0.68056&-34.022\\ \hline
-		-0.28571&2.0417&52.402\\ \hline
-		-0.14286&-6.125&-63.599\\ \hline
-		0&-1.1879e-14&60.934\\ \hline
-		0.14286&6.125&-45.866\\ \hline
-		0.28571&-2.0417&26.818\\ \hline
-		0.42857&0.68056&-11.939\\ \hline
-		0.57143&-0.18561&3.912\\ \hline
-		0.71429&0.037121&-0.88992\\ \hline
-		0.85714&-0.0047591&0.12559\\ \hline
-		1&0.00029138&-0.0082855\\ \hline
-	\end{tabular}
-\end{center}
+\problem{4(a)} The weights for the equispaced, Chebyshev, and Legendre points that approximate the derivative at $x=0$ and $x=-1+\tfrac{3}{14}$ are given in the tables below and are compared in figures (\ref{weights_at_neg11div14}) and (\ref{weights_at_0}). 
+\begin{table}[H]
+	\caption{Weights for the equispaced points.}
+	\begin{center}
+		\begin{tabular}{|c|c|c|}
+			\hline
+			$x$&weights for $z=0.00$&weights for $z=-\tfrac{11}{14}$\\ \hline
+			-1&-0.00029138&0.097975\\ \hline
+			-0.85714&0.0047591&-6.2847\\ \hline
+			-0.71429&-0.037121&1.4593\\ \hline
+			-0.57143&0.18561&16.859\\ \hline
+			-0.42857&-0.68056&-34.022\\ \hline
+			-0.28571&2.0417&52.402\\ \hline
+			-0.14286&-6.125&-63.599\\ \hline
+			0&-1.1879e-14&60.934\\ \hline
+			0.14286&6.125&-45.866\\ \hline
+			0.28571&-2.0417&26.818\\ \hline
+			0.42857&0.68056&-11.939\\ \hline
+			0.57143&-0.18561&3.912\\ \hline
+			0.71429&0.037121&-0.88992\\ \hline
+			0.85714&-0.0047591&0.12559\\ \hline
+			1&0.00029138&-0.0082855\\ \hline
+		\end{tabular}
+	\end{center}
+\end{table}
 
-\begin{figure}[H]
-	\caption{Weights for equispaced points}
-	\label{equ_weights}
-	\includegraphics[width=.9\textwidth]{hw1_p4b_equi_weights}
-	\centering
-\end{figure}
+%\begin{figure}[H]
+%	\caption{Weights for equispaced points}
+%	\label{equ_weights}
+%	\includegraphics[width=.9\textwidth]{hw1_p4b_equi_weights}
+%	\centering
+%\end{figure}
 
-The weights for the Chebyshev points that approximate the derivative at $x=0$ and $x=-1+\tfrac{3}{14}$ are given in the table below and seen in figure (\ref{cheb_weights}). 
+%The weights for the Chebyshev points that approximate the derivative at $x=0$ and $x=-1+\tfrac{3}{14}$ are given in the table below and seen in figure (\ref{cheb_weights}). 
+
+\begin{table}[H]
+	\caption{Weights for the Chebyshev points.}
 \begin{center}
 	\begin{tabular}{|c|c|c|}
 		\hline
@@ -375,16 +383,18 @@ The weights for the Chebyshev points that approximate the derivative at $x=0$ an
 		0.97493&-1.0257&-0.56005\\ \hline
 		1&0.5&0.2761\\ \hline
 	\end{tabular}
-\end{center}
+\end{center} \end{table}
 
-\begin{figure}[H]
-	\caption{Weights for the Chebyshev points}
-	\label{cheb_weights}
-	\includegraphics[width=.9\textwidth]{hw1_p4b_cheb_weights}
-	\centering
-\end{figure}
+%\begin{figure}[H]
+%	\caption{Weights for the Chebyshev points}
+%	\label{cheb_weights}
+%	\includegraphics[width=.9\textwidth]{hw1_p4b_cheb_weights}
+%	\centering
+%\end{figure}
 
-The weights for the Legendre points that approximate the derivative at $x=0$ and $x=-1+\tfrac{3}{14}$ are given in the table below and seen in figure (\ref{lege_weights}). 
+%The weights for the Legendre points that approximate the derivative at $x=0$ and $x=-1+\tfrac{3}{14}$ are given in the table below and seen in figure (\ref{lege_weights}). 
+\begin{table}[H]
+	\caption{Weights for the Legendre points.}
 \begin{center}
 	\begin{tabular}{|c|c|c|}
 		\hline
@@ -405,17 +415,34 @@ The weights for the Legendre points that approximate the derivative at $x=0$ and
 		0.93727&-0.2192&-0.033001\\ \hline
 		0.98799&0.06093&0.0094389\\ \hline
 	\end{tabular}
-\end{center}
+\end{center} \end{table}
+
+%\begin{figure}[H]
+%	\caption{Weights for Legendre points}
+%	\label{lege_weights}
+%	\includegraphics[width=.9\textwidth]{hw1_p4b_lege_weights}
+%	\centering
+%\end{figure}
 
 \begin{figure}[H]
-	\caption{Weights for Legendre points}
-	\label{lege_weights}
-	\includegraphics[width=.9\textwidth]{hw1_p4b_lege_weights}
+	\caption{Finite Difference weights for approximating $f^\prime(0)$}
+	\label{weights_at_0}
+	\includegraphics[width=.8\textwidth]{hw1_p4b_weights_0}
 	\centering
 \end{figure}
+
+\begin{figure}[H]
+	\caption{Finite Difference weights for approximating $f^\prime(-\tfrac{11}{14})$}
+	\label{weights_at_neg11div14}
+	\includegraphics[width=.8\textwidth]{hw1_p4b_weights_-11div14}
+	\centering
+\end{figure}
+
 \bigbreak
 
-\textit{Comparison}: In the equispaced points, the weights closer to the point at which we were approximating the derivative were larger, and grew smaller as we moved farther away. The Chebyshev points seemed to weight the points more equally. The Legendre points were similar to the equispaced points when approximating $f^\prime(0)$ but heavily weighted a few negative points for the approximation of $f^\prime(-\tfrac{11}{14})$. It should also be noted that all the weights for the approximation of $f^\prime(0)$ in all three point sets had rotational symmetry about $0$. That is that if $w(x_i)$ is the weight at $x_i$ then $w(-x_i) = -w(x_i)$.
+%\textit{Comparison}: In the equispaced points, the weights closer to the point at which we were approximating the derivative were larger, and grew smaller as we moved farther away. The Chebyshev points seemed to weight the points more equally. The Legendre points were similar to the equispaced points when approximating $f^\prime(0)$ but heavily weighted a few negative points for the approximation of $f^\prime(-\tfrac{11}{14})$. It should also be noted that all the weights for the approximation of $f^\prime(0)$ in all three point sets had rotational symmetry about $0$. That is that if $w(x_i)$ is the weight at $x_i$ then $w(-x_i) = -w(x_i)$.
+
+\textit{Comparison}: In the approximation of $f^\prime(0)$ all three sets of points give similar values for the weights of nearby points. However, for the approximation of $f^\prime(-\tfrac{11}{14})$ the equispaced points are quite different. The Chebyshev and Legendre points give relatively similar weights. Glancing ahead at the next problem, we see that the equispaced points give an approximation that is worse than the Chebyshev points by a factor of 2, and worse than the Legendre points by a factor of 10. The equispaced points are actually the best (of the three) at approximating the $f^\prime(0)$, possibly because this is not only in the stencil, but at the stencil center. 
 \bigbreak
 
 
@@ -426,12 +453,12 @@ The weights for the Legendre points that approximate the derivative at $x=0$ and
 	\begin{tabular}{|c|c|c|}
 		\hline
 		Points&Error in $f^\prime(0)$&Error in $f^\prime(-\tfrac{11}{14})$\\ \hline
-		Equispaced&1.622e-07&3.9239e-06\\ \hline
-		Chebyshev&3.3263e-06&1.2269e-06\\ \hline
-		Legendre&1.817e-06&2.5066e-07\\ \hline
+		Equispaced&5.2314e-07&1.4426e-06\\ \hline
+		Chebyshev&1.0728e-05&4.5105e-07\\ \hline
+		Legendre&5.8603e-06&9.2153e-08\\ \hline
 	\end{tabular}
 \end{center}
-From these errors none of the point sets seem particularly better than the rest. Using any would be fine.
+The equispaced points are actually the best (of the three) at approximating the $f^\prime(0)$, possibly because this is not only in the stencil, but at the stencil center. They are however far worse than the Chebyshev and Legendre points at approximating $f^\prime(-\tfrac{11}{14})$. In approximating $f^\prime(-\tfrac{11}{14})$ the Legendre points are better than the Chebyshev points by roughly a factor of 5 and better than the equispaced by roughly a factor of 10.
 \bigbreak
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -463,8 +490,8 @@ Let $x_j = \frac{2\pi j}{N}, j=0,1,...,N-1$ and show that $S_N(0)=1$ and that \\
 	
 	Note the angle multiple identity
 	\begin{align}
-	\sin(n \theta) &= \sum_{k=0}^n {n \choose k} \cos^k(\theta) + \sin^{n-k}(\theta) \sin(\tfrac{n-k}{2}\pi) \nonumber \\
-	\sin(n \theta) &= \sum_{k=0}^{n-1} {n \choose k} \cos^k(\theta) + \sin^{n-k}(\theta) \sin(\tfrac{n-k}{2}\pi) \text{.} \label{trig_ident}
+	\cos(n \theta) &= \sum_{k=0}^{n-1} {n \choose k} \cos^k(\theta) \sin^{n-k}(\theta) \cos(\tfrac{n-k}{2}\pi) \label{trig_ident_cos} \\
+	\sin(n \theta) &= \sum_{k=0}^{n-1} {n \choose k} \cos^k(\theta) \sin^{n-k}(\theta) \sin(\tfrac{n-k}{2}\pi) \text{.} \label{trig_ident_sin}
 	\end{align}
 	
 	\textbf{Case 1}: Suppose that $N$ is even and $z=0$. \bigbreak
@@ -474,9 +501,9 @@ Let $x_j = \frac{2\pi j}{N}, j=0,1,...,N-1$ and show that $S_N(0)=1$ and that \\
 	$$
 	but since $\cot(0)$ is undefined we have a discontinuity. It turns out that this is a removable discontinuity as seen by
 	\begin{align*}
-		\lim_{x \to 0}S_N \left( \tfrac{N}{2}x \right) &= \lim_{x \to 0} \frac{1}{N} \sin \left(\pi \tfrac{N}{2}x \right) \cot \left( \tfrac{\pi}{N}\tfrac{N}{2}x \right) \\
+		\lim_{x \to 0}S_N \left( \pi x \right) &= \lim_{x \to 0} \frac{1}{N} \sin \left(\tfrac{N}{2} \pi x \right) \cot \left( \tfrac{\pi x}{2}  \right) \\
 		&= \lim_{x \to 0} \frac{1}{N} \sin \left(N \tfrac{\pi}{2}x \right) \cot \left( \tfrac{\pi}{2}x \right) \\
-		&= \lim_{x \to 0} \frac{1}{N}  \cot \left( \tfrac{\pi}{2}x \right) \sum_{k=0}^{N-1} {N \choose k} \cos^k(\tfrac{\pi}{2}x) \sin^{N-k}(\tfrac{\pi}{2}x) \sin(\tfrac{N-k}{2}\pi) \text{ by }(\ref{trig_ident})\\
+		&= \lim_{x \to 0} \frac{1}{N}  \cot \left( \tfrac{\pi}{2}x \right) \sum_{k=0}^{N-1} {N \choose k} \cos^k(\tfrac{\pi}{2}x) \sin^{N-k}(\tfrac{\pi}{2}x) \sin(\tfrac{N-k}{2}\pi) \text{ by }(\ref{trig_ident_sin})\\
 		&= \lim_{x \to 0} \frac{1}{N} \sum_{k=0}^{N-1} {N \choose k} \cos^{k+1}(\tfrac{\pi}{2}x) \sin^{N-k-1}(\tfrac{\pi}{2}x) \sin(\tfrac{N-k}{2}\pi) \\
 		&= \frac{1}{N} {N \choose N-1} \cos^{N}(0)\sin^{0}(0) \sin(\tfrac{1}{2}\pi) \\
 		&= \frac{1}{N} N (1^{N})(0^0)(1) \\
@@ -517,9 +544,9 @@ Let $x_j = \frac{2\pi j}{N}, j=0,1,...,N-1$ and show that $S_N(0)=1$ and that \\
 	$$
 	but since $\csc(0)$ is undefined we have a discontinuity. It turns out that this is a removable discontinuity as seen by
 	\begin{align*}
-		\lim_{x \to 0}S_N \left( \tfrac{N}{2}x \right) &= \lim_{x \to 0} \frac{1}{N} \sin \left(\pi \tfrac{N}{2}x \right) \csc \left( \tfrac{\pi}{N}\tfrac{N}{2}x \right) \\
+		\lim_{x \to 0}S_N \left( \pi x \right) &= \lim_{x \to 0} \frac{1}{N} \sin \left( \tfrac{N}{2} \pi x \right) \csc \left( \tfrac{\pi x}{2} \right) \\
 		&= \lim_{x \to 0} \frac{1}{N} \sin \left(N \tfrac{\pi}{2}x \right) \csc \left( \tfrac{\pi}{2}x \right) \\
-		&= \lim_{x \to 0} \frac{1}{N}  \csc \left( \tfrac{\pi}{2}x \right) \sum_{k=0}^{n-1} {N \choose k} \cos^k(\tfrac{\pi}{2}x) \sin^{N-k}(\tfrac{\pi}{2}x) \sin(\tfrac{N-k}{2}\pi) \text{ by }(\ref{trig_ident})\\
+		&= \lim_{x \to 0} \frac{1}{N}  \csc \left( \tfrac{\pi}{2}x \right) \sum_{k=0}^{n-1} {N \choose k} \cos^k(\tfrac{\pi}{2}x) \sin^{N-k}(\tfrac{\pi}{2}x) \sin(\tfrac{N-k}{2}\pi) \text{ by }(\ref{trig_ident_sin})\\
 		&= \lim_{x \to 0} \frac{1}{N} \sum_{k=0}^{N-1} {N \choose k} \cos^{k}(\tfrac{\pi}{2}x) \sin^{N-k-1}(\tfrac{\pi}{2}x) \sin(\tfrac{N-k}{2}\pi) \\
 		&= \frac{1}{N} {N \choose N-1} \cos^{N-1}(0)\sin^{0}(0) \sin(\tfrac{1}{2}\pi) \\
 		&= \frac{1}{N} N (1^{n-1})(0^0)(1) \\
@@ -551,7 +578,7 @@ S_N^\prime(x_k) = \begin{cases} 0 & \text{if } k=0 \\
 							\frac{1}{2}(-1)^k\cot(k\pi / N), & \text{if } k \neq 0 \text{.} \end{cases}
 $$
 \begin{proof}
-	First note that since sine and cotangent are odd functions, $S_N$ is even. Thus for any $x \in \RR$ we know that $S_N(x) = S_N(-x)$. Then we have that
+	First note that since sine and cotangent are odd functions, $S_N$ is even. Thus for any $x \in \RR$ we know that $S_N(x) = S_N(-x)$. Suppose that the derivative exists. Then we have that
 	\begin{align*}
 		S_N^\prime(0) &= \lim_{h \to 0} \frac{S_N(0+h) - S_N(0-h)}{2h} \\
 			&= \lim_{h \to 0} \frac{S_N(h) - S_N(-h)}{2h} \\
@@ -560,7 +587,13 @@ $$
 			&= \lim_{h \to 0} 0 \\
 			&= 0 \text{.}
 	\end{align*}
-	Thus $S_N^\prime(x_0) = 0$.\bigbreak
+	Thus $S_N^\prime(x_0) = 0$. It remains to show that the derivative exists at all.\bigbreak
+	
+	Note that (\ref{trig_ident_sin}) is equivalent to
+	$$
+	\sin(n \theta) = \sum_{k\text{ odd}} (-1)^{\frac{k-1}{2}}{n \choose k} \sin^k(\theta)\cos^{n-k}(\theta) \sin(\tfrac{n-k}{2}\pi)
+	$$
+	and that the lowest power on $\sin$ is $1$. This tells us that when we multiply by $\cot$ (with the same argument) the lowest power on sine is $0$ and we have a finite sum of products of finite non-negative powers of sines and cosines which are all differentiable. Thus we know that $S_N$ is differentiable and that $S^\prime(0)=0$ as desired. \bigbreak
 	
 	In general for $N$ even,
 	\begin{align*}
@@ -570,6 +603,9 @@ $$
 		&= \frac{1}{2}\cos\left(\frac{N}{2}t \right)\cot \left( \frac{1}{2}t \right) - 
 		\frac{1}{2N}\sin \left(\frac{N}{2}t \right)  \csc^2 \left( \frac{1}{2}t \right) \text{.}
 	\end{align*}
+	
+	%From (\ref{trig_ident_cos}) we can see that the discontinuity for $\cos\left(\frac{N}{2}t \right)\cot \left( \frac{1}{2}t \right)$ will vanish in a similar fashion to above. 
+	
 	For $0 < k < N$ we have that
 	\begin{align*}
 		S_N^\prime(x_k) &= S_N^\prime\left(\frac{2\pi}{N}k \right) \\
