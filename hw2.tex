@@ -148,8 +148,9 @@ We are now ready to prove the theorem.\bigbreak
 	&= \frac{1}{N} \sum\limits_{m=0}^{N-1}\sum\limits_{k=0}^{N-1} \omega_N^{-lm + (m-k)n} a_{k} \\
 	&= \frac{1}{N} \sum\limits_{m=0}^{N-1}\sum\limits_{k=0}^{N-1} \omega_N^{(n-l)m -nk} a_{k} \\
 	&= \sum\limits_{m=0}^{N-1} \omega_N^{(n-l)m} \frac{1}{N} \sum\limits_{k=0}^{N-1} a_{k}\omega_N^{-nk}  \\
-	& = \sum\limits_{m=0}^{N-1} \omega_N^{(n-l)m} \hat{a}_k \\
-	& = \begin{cases} N \hat{a}_k & \text{ if } l=n \\
+	& = \frac{1}{N}\sum\limits_{m=0}^{N-1} \omega_N^{(n-l)m} \hat{a}_k \\
+	& = \begin{cases}
+			\hat{a}_k & \text{ if } l=n \\
 					0 & \text{ else}
 		\end{cases} \\
 	&= \hat{A}_{ln} \text{.}
@@ -248,7 +249,7 @@ These results verify that the multiplication is done correctly. It is interestin
 $$
 \text{iDST}(\hat{\vec{f}}) = \text{iDST}\left( \left(2a\cos \tfrac{\pi \vec{k}}{N} +b\right) \hat{\vec{u}} \right)
 $$
-and since the iDST is invertible, we can equate the vectors $\hat{f}_k = \left(2a\cos \tfrac{\pi k}{N} +b\right) \hat{u}_k$. Rearanging the terms we arrive at
+and since the iDST is invertible, we can equate the vectors $\hat{f}_k = \left(2a\cos \tfrac{\pi k}{N} +b\right) \hat{u}_k$. Rearranging the terms we arrive at
 $$
 \hat{u}_k = \frac{\hat{f}_k}{2a\cos \tfrac{\pi k}{N} +b}, \ \ \ k=1,\dots, N-1
 $$
@@ -324,7 +325,7 @@ Differentiating the Helmholtz equation twice and applying our second order appro
 %\frac{1}{h^2}\begin{bmatrix} 1 & -2 & 1 \end{bmatrix}
 Summing $(\ref{like_equ9}) + \frac{h^2}{12} (\ref{like_equ10})$ we have
 \begin{align*}
-	\frac{1}{12}\begin{bmatrix} 1 & 10 & 1 \end{bmatrix}\vec{f} + \bigO(h^4) &= \begin{bmatrix} (k^2+\frac{12}{h^2}) & (10k^2-\frac{24}{h^2}) & (k^2+\frac{12}{h^2})\end{bmatrix}\vec{u}
+	\begin{bmatrix} 1 & 10 & 1 \end{bmatrix}\vec{f} + \bigO(h^4) &= \begin{bmatrix} (k^2+\frac{12}{h^2}) & (10k^2-\frac{24}{h^2}) & (k^2+\frac{12}{h^2})\end{bmatrix}\vec{u}
 \end{align*}
 a fourth order three point stencil for the Helmholtz equation. It remains to calculate the stencils for the boundary. When accounting for the boundaries we arrive at the following system
 $$
