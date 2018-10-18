@@ -98,7 +98,7 @@
 \begin{center}{\large \textbf{Homework 2}}\end{center}
 \bigbreak
 
-\hspace{-.5 ex}\problem{1} 
+\hspace{-.5 ex}\problem{1}
 
 \textit{Lemma}: Given two vectors $\vec{a}, \vec{x} \in \CC^N$ the product of their circulants is the circulant of their convolution. That is
 $$
@@ -127,6 +127,7 @@ $$
 	&= \sum\limits_{l=0}^{N-1} a_{i-l}x_{l-j}
 	\end{align*}
 \end{proof}
+\bigbreak
 
 We are now ready to prove the theorem.\bigbreak
 
@@ -168,6 +169,19 @@ We are now ready to prove the theorem.\bigbreak
 	\hat{A}\hat{\vec{x}} &= \hat{\vec{b}} \text{.}
 	\end{align*}
 \end{proof}
+\bigbreak
+
+After I finished this proof I realized that $U^*\vec{x} = \hat{\vec{x}}$. In my proof I correctly apply the FFT, but I could have saved a lot of time and avoided notational difficulty if I had realized this sooner. Why is $U$ called the DFT matrix instead of calling $U^*$ the DFT matrix? It seems like the matrix $U$ should be called the inverse discrete Fourier transform matrix instead of the Fourier transform matrix.
+\bigbreak
+
+At any rate, the simplified version goes as follows:
+\begin{align*}
+	\hat{A} &= \frac{1}{N}U^* A U \\
+	\hat{A}\hat{\vec{x}} &= U^* A \frac{1}{N}U \hat{\vec{x}} \\
+	&= U^* A \vec{x} \\
+	&= U^* \vec{b} \\
+	&= \hat{\vec{b}} \text{.}
+\end{align*}
 
 \bigbreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
