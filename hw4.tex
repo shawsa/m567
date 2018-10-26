@@ -268,6 +268,114 @@ These points seem moot given the astounding speeds of the Discrete Sine Transfor
 
 \bigbreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\problem{3(a)} Develop a second-order-accurate FD method for solving the Poisson equation on a square with the Neumann boundary conditions that specify zero flux over the boundary. \bigbreak
+
+The system will be the same as in problem 2, with the Dirichlet boundary conditions except for the equations corresponding to points on the boundary. The equations corresponding to the stencils at the corners of the domain are 
+%South-West corner (centered at $(x_0,y_0)$) will be 
+\begin{align*}
+\begin{bmatrix}&2&\\0&-4&2\\&0&\end{bmatrix}u =& f(x_0,y_0) + \frac{4}{h} \sigma(x_0, y_0) \tag{South-West} \\
+\begin{bmatrix}&2&\\2&-4&0\\&0&\end{bmatrix}u =& f(x_{m+1},y_0) + \frac{4}{h} \sigma(x_{m+1}, y_0) \tag{South-East} \\
+\begin{bmatrix}&0&\\0&-4&2\\&2&\end{bmatrix}u =& f(x_0,y_{m+1}) + \frac{4}{h} \sigma(x_0, y_{m+1}) \tag{North-West} \\
+\begin{bmatrix}&0&\\2&-4&0\\&2&\end{bmatrix}u =& f(x_{m+1},y_{m+1}) + \frac{4}{h} \sigma(x_{m+1}, y_{m+1}) \tag{North-East} \\
+\end{align*} 
+For each other point on the boundary the equations corresponding to the stencils are
+%boundary $(x_j, y_0)$ (not including the corners) the equation corresponding to the stencil is
+\begin{align*}
+%\begin{bmatrix}&1&\\1&-4&1\\&2&\end{bmatrix}u = f(x_0,y_0) + \frac{2}{h} \sigma(x_i, y_0)
+\begin{bmatrix}&2&\\1&-4&1\\&0&\end{bmatrix}u =& f(x_i,y_0) + \frac{2}{h} \sigma(x_i, y_0) \tag{Southern} \\
+\begin{bmatrix}&1&\\2&-4&0\\&1&\end{bmatrix}u =& f(x_{m+1},y_j) + \frac{2}{h} \sigma(x_{m+1}, y_j) \tag{Eastern} \\
+\begin{bmatrix}&0&\\1&-4&1\\&2&\end{bmatrix}u =& f(x_i,y_{m+1}) + \frac{2}{h} \sigma(x_i, y_{m+1}) \tag{Northern} \\
+\begin{bmatrix}&1&\\0&-4&2\\&1&\end{bmatrix}u =& f(x_{m+1},y_j) + \frac{2}{h} \sigma(x_{m+1}, y_j) \tag{Western} \\
+\end{align*}
+In all eight of these cases the stencil center is centered at the point at which $f$ is evaluated. \bigbreak
+
+Since the flux at the boundary is defined to be zero for our problem, in our implementation we ignore the sigma terms. Then we can represent our system of equations at the matrix equation
+$$
+D_2U + U D_2 = h^2F
+$$
+Where $D_2$ is the one dimensional second order accurate Finite difference matrix with Neumann boundary conditions, $U$ is our matrix of unknowns, and $F$ the matrix with entries $f(x_i,y_i)$. Applying the DCT (in matrix form $S$) row-wise and column-wise we have
+\begin{align*}
+S^{-1}D_2 S S^{-1}US + S^{-1}US S^{-1}D_2S &= h^2S^{-1} F S \\
+\Lambda \hat{U} + \hat{U} \Lambda &= \hat{F} \\
+\frac{h^2}{\lambda_{i} + \lambda_{j}} \hat{F}_{i,j} &= \hat{U}_{i,j}.
+\end{align*}
+The matrix $\Lambda = S^{-1}D_2S$ is diagonal, and the diagonal entries are known giving the key equation
+\begin{align}
+\hat{U}_{i,j} &= \frac{h^2}{2\cos(\frac{\pi i}{m+1}) + 2\cos(\frac{\pi j}{m+1})-4}\hat{F}_{i,j} \label{keyEquation}
+\end{align}
+for all values of $\hat{U}$ except for $\hat{U}_{0,0}$ which we choose arbitrarily, and is interpreted as the "total mass" or "total energy" of the solution. Solutions of our PDE will be equivalent up to a constant which corresponds to this value (in general it is not equal). \bigbreak
+
+Thus our full algorithm is almost exactly the same as in our one-dimensional case.
+\begin{enumerate}
+	\item Form the matrix $F$ where $F_{i,j} = f(x_i, y_j)$.
+	\item Compute $\hat{F} = S^{-1}FS$. In implementation this is the DCT applied to the rows and the IDCT (which is equivalent to the DCT up to scaling) to the columns. 
+	\item Use (\ref{keyEquation}) to compute $\hat{U}$.
+	\item Arbitrarily assign a value corresponding to the total mass $\hat{U}_{0,0}$.
+	\item Compute $U = S\hat{U}S^{-1}$. In implementation this is the IDCT applied to the rows, then the DCT applied to the columns.
+\end{enumerate}
+I have implemented this algorithm in Python, seen below.
+
+\begin{lstlisting}[language=Python]
+def fd2poissondct(forcing, a, b, m):
+	h = (b-a)/(m+1)
+	xs = np.linspace(a, b, m+2)
+	X, Y = np.meshgrid(xs, xs)
+	fs = foo(X, Y)
+	# fhat=(S*f)*S^(-1)
+	f_hat = fft.idct(fft.dct(fs, type=1, axis=0)/2,
+			type=1, axis=1)/(m+1)
+	cos_vec = np.cos(np.pi*np.arange(0,m+2)/(m+1))
+	denom = 2*(np.add.outer(cos_vec, cos_vec)-2)
+	denom[0,0] = 1 #temporary to allow for the division
+	u_hat = h**2 * f_hat / denom
+	u_hat[0,0] = 0 # arbitrarily chosen
+	us = fft.dct(fft.idct(u_hat, type=1, axis=0)/(m+1),
+			type=1, axis=1)/2
+	return us
+\end{lstlisting}
+
+\bigbreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\problem{3(b)} The fast DCT solver above was applied to the problem with the forcing term of 
+$$
+f(x,y) = -8\pi^2 \cos(2\pi x )\cos(2\pi y )
+$$
+for which the exact solution is known analytically. Using $m=2^6-1$ we obtain a relative error in the solution of $\approx 0.000803578$. The solution and error plots can be seen below.
+\begin{figure}[H]
+	\centering
+	\caption{Plots of the solution and error using DCT.}
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{hw4_p3_plot}
+		%\captionof{figure}{A figure}
+		\label{fig:test1}
+	\end{minipage}%
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{hw4_p3_error}
+		%\captionof{figure}{Another figure}
+		\label{fig:test2}
+	\end{minipage}
+\end{figure}
+
+This was tested for $m^2-1$ interior points for values of $k=4, 5, ..., 10$. The results are shown in the table below. The table clearly shows that as $m$ doubles (nearly doubles that is) i.e. the step size is halved, the error is reduced by a factor of 4. This suggests second order convergence as we expected.
+
+\begin{center}
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		$k$&$m=2^k-1$&Relative $L^2$ Error&ratio\\ \hline
+		4&15&0.012951&-\\ \hline
+		5&31&0.003219&4.0233\\ \hline
+		6&63&0.00080358&4.0058\\ \hline
+		7&127&0.00020082&4.0014\\ \hline
+		8&255&5.0201e-05&4.0004\\ \hline
+		9&511&1.255e-05&4.0001\\ \hline
+		10&1023&3.1375e-06&4\\ \hline
+	\end{tabular}
+\end{center}
+
+\bigbreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \problem{4(a)} Our goal is to derive the fourth-order-accurate approximation to $\Delta u = f$:
 $$
 \frac{1}{6h^2}\begin{bmatrix}1 & 4 & 1\\4 & -20&4\\1&4&1\end{bmatrix}u = \frac{1}{12}\begin{bmatrix} & 1 & \\1 & 8&4\\&1&\end{bmatrix}f + \mathcal{O}(h^4).
@@ -318,11 +426,142 @@ as desired.
 
 \bigbreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\problem{4(b)}
+\problem{4(b)} The Python function below implements this scheme, and solves the system using sparse matrices.
+
+\begin{lstlisting}[language=python]
+def fd2_poisson_compact(forcing, boundary, a, b, m):
+	h = (b-a)/(m+1)
+	diagonals = [4.0, -20, 4]
+	main_diag_val = sp.diags(diagonals, [-1,0,1], 
+			shape=(m,m), format='csr')
+	main_diag_loc = sp.eye(m)
+	diagonals = [1, 4, 1]
+	sub_diag_val = sp.diags(diagonals, [-1,0,1], 
+			shape=(m,m), format='csr')
+	sub_diag_loc = sp.diags([1,0,1], [-1, 0, 1], 
+			shape=(m,m), format='csr')
+	M = sp.kron(main_diag_val, main_diag_loc) 
+			+ sp.kron(sub_diag_val, sub_diag_loc)
+	
+	xs = np.linspace(a,b,m+2, endpoint=True)
+	X,Y = np.meshgrid(xs,xs)
+	fs = forcing(X,Y)
+	us = boundary(X,Y)
+	us[1:-1,1:-1] = np.zeros((m,m))
+	
+	rhs = np.zeros((m,m))
+	# sum fs
+	rhs +=   fs[1:-1,  :-2] # North
+	rhs +=   fs[1:-1, 2:  ] # South
+	rhs +=   fs[2:  , 1:-1] # East
+	rhs +=   fs[:-2 , 1:-1] # West
+	rhs += 8*fs[1:-1, 1:-1] # Center
+	rhs *= h**2/2
+	# account for boundary conditions
+		# corners
+	rhs_b = np.zeros((m,m))
+	rhs_b += us[:-2,  :-2] # North-west
+	rhs_b += us[:-2, 2:  ] # North-east
+	rhs_b += us[2: ,  :-2] # South-west
+	rhs_b += us[2: , 2:  ] # South-east
+		# edges
+	rhs_b += 4*us[1:-1,  :-2] # North
+	rhs_b += 4*us[1:-1, 2:  ] # South
+	rhs_b += 4*us[2:  , 1:-1] # East
+	rhs_b += 4*us[:-2 , 1:-1] # West
+		#center
+	rhs_b += -20*us[1:-1, 1:-1] # Center
+	
+	rhs -= rhs_b
+	rhs = rhs.flatten()
+	us[1:-1,1:-1] = spla.spsolve(M,rhs).reshape((m,m))
+	return us
+\end{lstlisting}
+
+This code was applied to the PDE in problem 2 with $m=2^{10}-1$. The solution and error plots can be seen below.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{hw4_p4}
+	%\captionof{figure}{A figure}
+\end{figure}
+
+This fourth order algorithm was applied to the PDE in problem 2 with $m=2^k-1$ for $k=4, 5, ..., 10$. The results are seen in the table below and plot. If we refine the mesh by a factor of 2 (roughly double $m$) we see the error go down by a factor of $16=2^4$. This is exactly what we expect from a fourth order algorithm.
+
+\begin{center}
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		$k$&$m=2^k-1$&Relative $L^2$ Error&ratio\\ \hline
+		4&15&0.0021715&-\\ \hline
+		5&31&0.0001109&19.58\\ \hline
+		6&63&6.6201e-06&16.753\\ \hline
+		7&127&4.1065e-07&16.121\\ \hline
+		8&255&2.5667e-08&15.999\\ \hline
+		9&511&1.6058e-09&15.984\\ \hline
+		10&1023&1.0066e-10&15.953\\ \hline
+	\end{tabular}
+\end{center}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{hw4_p4_convergence}
+	%\captionof{figure}{A figure}
+\end{figure}
 
 \bigbreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\problem{4(c)}
+\problem{4(c)} \textit{Extra Credit} Solve the system from part (b) using the DST. Plot the difference between this solution and the solution from the sparse solver to show that they are essentially the same. Show the computational efficiency. \bigbreak
+
+The key to this algorithm is determining the correct denominator with which to divide $\hat{F}$ to determine $\hat{U}$. We begin by considering the stencil
+$$
+{\color{blue}u_{-1,-1}+u_{-1,1}+u_{1,-1}+u_{1,1}}+ 4({\color{red}u_{0,-1}+u_{0,1}u_{-1,}u_{1,0}}) - 20 u_{0,0}.
+$$
+Let $\omega = \frac{\pi}{m+1}$. If we apply our stencil at $u_{i,j}$ and apply the DST row-wise and column-wise to the {\color{blue}blue} we get (omitting the $\hat{u}$ for brevity)
+\begin{align*}
+\sum_{k=1}^m\sum_{l=1}^m & \sin(\omega k(i-1))\sin(\omega l(j-1)) \\
+					   + & \sin(\omega k(i+1))\sin(\omega l(j-1)) \\
+					   + & \sin(\omega k(i-1))\sin(\omega l(j+1)) \\
+					   + & \sin(\omega k(i+1))\sin(\omega l(j+1)) \\
+\sum_{k=1}^m\sum_{l=1}^m & \left[ \sin(\omega k(i-1)) + \sin(\omega k(i+1)) \right]\\
+					   * & \left[ \sin(\omega l(j-1)) + \sin(\omega l(j+1)) \right]\\
+\sum_{k=1}^m\sum_{l=1}^m & 4\sin(\omega ki)\sin(\omega lj)\cos(\omega k)\cos(\omega l) \\
+4 & \sin(\omega ki)\sin(\omega lj)\sum_{k=1}^m\sum_{l=1}^m \cos(\omega k)\cos(\omega l).
+\end{align*}
+
+If we do the same for the {\color{red}red} we have
+\begin{align*}
+\sum_{k=1}^m\sum_{l=1}^m & \sin(\omega k(i-1))\sin(\omega lj) \\
+					   + & \sin(\omega k(i+1))\sin(\omega lj) \\
+					   + & \sin(\omega ki)\sin(\omega l(j+1)) \\
+					   + & \sin(\omega ki)\sin(\omega l(j+1)) \\
+\sum_{k=1}^m\sum_{l=1}^m & \sin(\omega lj) \left[ \sin(\omega k(i-1)) + \sin(\omega k(i+1)) \right]\\
+					   + & \sin(\omega ki) \left[ \sin(\omega l(j-1)) + \sin(\omega l(j+1)) \right] \\
+\sum_{k=1}^m\sum_{l=1}^m & \sin(\omega lj) 2\sin(\omega ki) \cos(\omega k) \\
+                       + & \sin(\omega ki) 2\sin(\omega lj) \cos(\omega l) \\
+4 & \sin(\omega ki)\sin(\omega lj)\sum_{k=1}^m\sum_{l=1}^m \cos(\omega k)\cos(\omega l)       
+\end{align*}
+remarkably the same as the {\color{blue}blue}! \bigbreak
+
+Substituting these into the stencil we have
+$$
+\sin(\omega ki)\sin(\omega lj) 20\sum_{k=1}^m\sum_{l=1}^m \cos(\omega k)\cos(\omega l) - 1.
+$$
+Applying the IDST to these gives us our denominator
+$$
+\hat{U}_{kl} = \frac{\frac{6h^2}{12}}{20\cos(\omega k)\cos(\omega l) - 20} \hat{F}_{kl}
+$$
+or equivalently (using a trigonometric identity and making a change of indices)
+$$
+\hat{U}_{kl} = \frac{\frac{6h^2}{12}}{20\big(\cos(\omega k) + \cos(\omega l) - 2\big)} \hat{F}_{kl}.
+$$
+At least these formula are almost right. When applied to our problem they give a solution that is close to correct. The plot below shows the solution and the error when the output is scaled by a factor of $\frac{10}{6}$. 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{hw4_p4_c}
+	%\captionof{figure}{A figure}
+\end{figure}
+It is not clear where this factor comes from, and is likely a mistake in my implementation. Even if the solution were scaled perfectly, the error would not be ideal. It seems that near the boundary the error spikes, particularly at the crests of the waves. Since the adjustments for the boundary conditions are accounted for in the exact same way as the sparse matrix solution it seems very unlikely that this would be the source of the error. More probably the error is in the denominator of the calculation of $\hat{U}$. Specifically the stencils on the boundary have missing values. In the one-dimensional DST these worked out to not be special cases, but to still follow the form. I suspect that having values significantly off of the main diagonal may have some impact on this. I attempted a correction, but was unsuccessful.
+
 
 \bigbreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

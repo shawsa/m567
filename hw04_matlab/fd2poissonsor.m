@@ -31,7 +31,7 @@ ubw = feval(gfun,x(idy,1),y(idy,1));         % No corners
 % Evaluate the RHS of Poisson's equation at the interior points.
 f = feval(ffun,x(idy,idx),y(idy,idx));
 
-r_tol = tol * norm(f);
+r_tol = tol * norm(reshape(f,m,m));
 
 rhs = h^2 * f;
 
@@ -41,11 +41,11 @@ rhs = h^2 * f;
 % f(1,1:m) = f(1,1:m) - ubs(idx)/h^2;    % South
 % f(m,1:m) = f(m,1:m) - ubn(idx)/h^2;    % North
 
-u = ones(m,m);
+u = zeros(m,m);
 u = [ubs;[ubw,u,ube];ubn];
 
 omega = 2/(1+sin(pi*h));
-% omega = 1;
+%omega = 1;
 
 for i=1:max_iter
     for r=2:m+1
@@ -68,6 +68,7 @@ end
 if i==max_iter
    warning('Max iterations reached in SOR.'); 
 end
+i
  
 end
 
