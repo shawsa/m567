@@ -293,13 +293,13 @@ Since the flux at the boundary is defined to be zero for our problem, in our imp
 $$
 D_2U + U D_2 = h^2F
 $$
-Where $D_2$ is the one dimensional second order accurate Finite difference matrix with Neumann boundary conditions, $U$ is our matrix of unknowns, and $F$ the matrix with entries $f(x_i,y_i)$. Applying the DCT (in matrix form $S$) row-wise and column-wise we have
+Where $D_2$ is the one dimensional second order accurate Finite difference matrix with Neumann boundary conditions, $U$ is our matrix of unknowns, and $F$ the matrix with entries $f(x_i,y_i)$. Applying the DCT (in matrix form $C$) row-wise and column-wise we have
 \begin{align*}
-S^{-1}D_2 S S^{-1}US + S^{-1}US S^{-1}D_2S &= h^2S^{-1} F S \\
+CD_2 C^{-1} CUC^{-1} + CUC^{-1} CD_2C^{-1} &= h^2C F C^{-1} \\
 \Lambda \hat{U} + \hat{U} \Lambda &= \hat{F} \\
 \frac{h^2}{\lambda_{i} + \lambda_{j}} \hat{F}_{i,j} &= \hat{U}_{i,j}.
 \end{align*}
-The matrix $\Lambda = S^{-1}D_2S$ is diagonal, and the diagonal entries are known giving the key equation
+The matrix $\Lambda = CD_2C^{-1}$ is diagonal, and the diagonal entries are known giving the key equation
 \begin{align}
 \hat{U}_{i,j} &= \frac{h^2}{2\cos(\frac{\pi i}{m+1}) + 2\cos(\frac{\pi j}{m+1})-4}\hat{F}_{i,j} \label{keyEquation}
 \end{align}
@@ -308,10 +308,10 @@ for all values of $\hat{U}$ except for $\hat{U}_{0,0}$ which we choose arbitrari
 Thus our full algorithm is almost exactly the same as in our one-dimensional case.
 \begin{enumerate}
 	\item Form the matrix $F$ where $F_{i,j} = f(x_i, y_j)$.
-	\item Compute $\hat{F} = S^{-1}FS$. In implementation this is the DCT applied to the rows and the IDCT (which is equivalent to the DCT up to scaling) to the columns. 
+	\item Compute $\hat{F} = CFC^{-1}$. In implementation this is the DCT applied to the rows and the IDCT (which is equivalent to the DCT up to scaling) to the columns. 
 	\item Use (\ref{keyEquation}) to compute $\hat{U}$.
 	\item Arbitrarily assign a value corresponding to the total mass $\hat{U}_{0,0}$.
-	\item Compute $U = S\hat{U}S^{-1}$. In implementation this is the IDCT applied to the rows, then the DCT applied to the columns.
+	\item Compute $U = C^{-1}\hat{U}C$. In implementation this is the IDCT applied to the rows, then the DCT applied to the columns.
 \end{enumerate}
 I have implemented this algorithm in Python, seen below.
 
@@ -512,11 +512,11 @@ This fourth order algorithm was applied to the PDE in problem 2 with $m=2^k-1$ f
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \problem{4(c)} \textit{Extra Credit} Solve the system from part (b) using the DST. Plot the difference between this solution and the solution from the sparse solver to show that they are essentially the same. Show the computational efficiency. \bigbreak
 
-The key to this algorithm is determining the correct denominator with which to divide $\hat{F}$ to determine $\hat{U}$. We begin by considering the stencil
+The key to this algorithm is determining the correct denominator with which to divide $\hat{F}$ in order to calculate $\hat{U}$. We begin by considering the stencil
 $$
 {\color{blue}u_{-1,-1}+u_{-1,1}+u_{1,-1}+u_{1,1}}+ 4({\color{red}u_{0,-1}+u_{0,1}u_{-1,}u_{1,0}}) - 20 u_{0,0}.
 $$
-Let $\omega = \frac{\pi}{m+1}$. If we apply our stencil at $u_{i,j}$ and apply the DST row-wise and column-wise to the {\color{blue}blue} we get (omitting the $\hat{u}$ for brevity)
+Let $\omega = \frac{\pi}{m+1}$. If we apply our stencil at $u_{i,j}$ and apply the DST row-wise and column-wise ((that is, substitute the 2D DST into the linear system) to the {\color{blue}blue} we get (omitting the $\hat{u}$ for brevity)
 \begin{align*}
 \sum_{k=1}^m\sum_{l=1}^m & \sin(\omega k(i-1))\sin(\omega l(j-1)) \\
 					   + & \sin(\omega k(i+1))\sin(\omega l(j-1)) \\
@@ -524,8 +524,8 @@ Let $\omega = \frac{\pi}{m+1}$. If we apply our stencil at $u_{i,j}$ and apply t
 					   + & \sin(\omega k(i+1))\sin(\omega l(j+1)) \\
 \sum_{k=1}^m\sum_{l=1}^m & \left[ \sin(\omega k(i-1)) + \sin(\omega k(i+1)) \right]\\
 					   * & \left[ \sin(\omega l(j-1)) + \sin(\omega l(j+1)) \right]\\
-\sum_{k=1}^m\sum_{l=1}^m & 4\sin(\omega ki)\sin(\omega lj)\cos(\omega k)\cos(\omega l) \\
-4 & \sin(\omega ki)\sin(\omega lj)\sum_{k=1}^m\sum_{l=1}^m \cos(\omega k)\cos(\omega l).
+\sum_{k=1}^m\sum_{l=1}^m & 2\sin(\omega ki)\cos(\omega k)2\sin(\omega lj)\cos(\omega l) \\
+\sum_{k=1}^m\sum_{l=1}^m & 4\sin(\omega ki)\sin(\omega lj) \cos(\omega k)\cos(\omega l).
 \end{align*}
 
 If we do the same for the {\color{red}red} we have
@@ -538,7 +538,7 @@ If we do the same for the {\color{red}red} we have
 					   + & \sin(\omega ki) \left[ \sin(\omega l(j-1)) + \sin(\omega l(j+1)) \right] \\
 \sum_{k=1}^m\sum_{l=1}^m & \sin(\omega lj) 2\sin(\omega ki) \cos(\omega k) \\
                        + & \sin(\omega ki) 2\sin(\omega lj) \cos(\omega l) \\
-4 & \sin(\omega ki)\sin(\omega lj)\sum_{k=1}^m\sum_{l=1}^m \cos(\omega k)\cos(\omega l)       
+\sum_{k=1}^m\sum_{l=1}^m & 4 \sin(\omega ki)\sin(\omega lj)\cos(\omega k)\cos(\omega l)       
 \end{align*}
 remarkably the same as the {\color{blue}blue}! \bigbreak
 
@@ -548,12 +548,13 @@ $$
 $$
 Applying the IDST to these gives us our denominator
 $$
-\hat{U}_{kl} = \frac{\frac{6h^2}{12}}{20\cos(\omega k)\cos(\omega l) - 20} \hat{F}_{kl}
+\hat{U}_{kl} = \frac{\frac{6h^2}{12}}{20\cos(\omega k)\cos(\omega l) - 20} \hat{F}_{kl}.
 $$
-or equivalently (using a trigonometric identity and making a change of indices)
-$$
-\hat{U}_{kl} = \frac{\frac{6h^2}{12}}{20\big(\cos(\omega k) + \cos(\omega l) - 2\big)} \hat{F}_{kl}.
-$$
+%
+%or equivalently (using a trigonometric identity and making a change of indices)
+%$$
+%\hat{U}_{kl} = \frac{\frac{6h^2}{12}}{20\big(\cos(\omega k) + \cos(\omega l) - 2\big)} \hat{F}_{kl}.
+%$$
 At least these formula are almost right. When applied to our problem they give a solution that is close to correct. The plot below shows the solution and the error when the output is scaled by a factor of $\frac{10}{6}$. 
 \begin{figure}[H]
 	\centering
@@ -596,7 +597,7 @@ It is not clear where this factor comes from, and is likely a mistake in my impl
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \problem{5(c)} Is the initial value problem 
 $$
-u'(t) = \vert u \vert, \phantom{=} -1 \leq t \leq 1, \phantom{=}u(-1)=-1
+u'(t) = \vert u \vert, \phantom{=} -1 \leq t \leq 1, \phantom{=}u(-1)=-1 = u_0
 $$
 well-posed? \bigbreak
 
@@ -607,7 +608,20 @@ well-posed? \bigbreak
 	
 	As stated in part (b), $f(u,t) = \vert u \vert$ is Lipschitz on the domain $\mathcal{D}=[-1,1] \times (-\infty, \infty)$. The same proof can be used to show that it is Lipschitz on $\mathcal{D}=[a,b] \times [-1,1]$ for any closed interval $[a,b]$. \bigbreak
 	
-	By our Existence and Uniqueness Theorem we have that the IVP has a unique solution for $t \in [-1, 1]$.
+	By our Existence and Uniqueness Theorem we have that the IVP has a unique solution for $t \in [-1, 1]$. Lastly we need to show that the solution varies continuously with perturbations of the initial conditions and forcing term. \bigbreak
+	
+	Let $\varepsilon > 0$ be given. Choose $\kappa (\varepsilon) = 2$. Let $\delta(t)$ be a continuous function, and let $\tilde u_0 \in [-1,1]$ such that $\vert \delta(t) \vert < \varepsilon$ and so that $\vert \tilde u_0 - u_0 \vert < \varepsilon$ and the solution $\tilde u$ to
+	$$
+	\tilde u' = \vert \tilde u \vert + \delta(t)
+	$$
+	exists. \bigbreak
+	
+	Define $y = \tilde u - u$ and $y_0 = \tilde u_0 - u_0$. Then $y$ satisfies the differential equation
+	$y' = \delta(t)$ and $\vert y' \vert < \varepsilon$ with $\vert y_0 \vert < \varepsilon$ as well. So the solution $y = \int_{-1}^t \delta(\tau) d\tau + y_0$ can be bounded by 
+	$$
+	\varepsilon(-t) - \varepsilon < y < \varepsilon t + \varepsilon
+	$$
+	or simply $\vert y \vert < \varepsilon (\vert t \vert + 1) \leq 2\varepsilon = \kappa(\varepsilon)\varepsilon$. Thus showing that the IVP varies continuously with the initial conditions and forcing term and is therefore well-posed. 
 \end{proof}
 
 \end{document}

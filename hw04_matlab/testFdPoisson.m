@@ -1,7 +1,7 @@
 % Script for testing fd2poisson over the square [a,b]x[a,b]
 a = 0; 
 b = 1;
-k = 7;
+k = 6;
 m = 2^k-1;  % Number of interior grid points in one direction
 h = (b-a)/(m+1);
 
