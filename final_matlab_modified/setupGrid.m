@@ -48,7 +48,6 @@ grid.L = L;
 grid.dx = L/m;
 grid.dy = L/m;
 grid.dt = cfl*min(grid.dx,grid.dy);
- 
 
 % Laplacian for the pressure step (interior nodes).
 mx = grid.mpx-2;

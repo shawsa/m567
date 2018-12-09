@@ -33,6 +33,10 @@ u(1,grid.mux) = 0.5*u(1,grid.mux);
 u(grid.muy,1) = 0.5*u(grid.muy,1);
 u(grid.muy,grid.mux) = 0.5*u(grid.muy,grid.mux);
 
+% Enforce zero flow at the corners of the moving lid
+u(grid.muy,1) = 0;
+u(grid.muy,grid.mux) = 0;
+
 %
 % Do v-component second
 %
