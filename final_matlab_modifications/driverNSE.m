@@ -8,24 +8,24 @@
 % Which we abbreviate as GGS82
 
 % Reynolds number.  Re=100, 400, 1000 are the options for comparisons.
-Re = 400; 
+Re = 100; 
 
 % Contour levels for plotting the stream function to compare GGS82.
 cntrs = [-1e-10 -1e-7 -1e-5 -1e-4 -1e-2 -3e-2 -5e-2 -7e-2 -9e-2 -0.1 -0.11 -0.115 -0.1175];
 cntrs = [cntrs 1e-8 1e-7 1e-6 1e-5 5e-5 1e-4 2.5e-4 5e-4 1e-3 1.5e-3 3e-3];
 
 % Max CFL number to run at
-cfl = 0.5; 
+cfl = 1; %0.5; 
 
 % Grid - only square grids are handled
 L = 1;    % Unit box
-m = 2^6;  % Number of cell-centers on the grid.
+m = 2^4; %6;  % Number of cell-centers on the grid.
 grid = setupGrid(L,m,cfl,Re);
 dt    = grid.dt;
 
 % Time parameters
 time  = 0; 
-tfinal = 40;
+tfinal = 10; %40;
 tstep = tfinal/dt;  % number of time-steps 
 
 % Create the grid of values for plotting the stream function
@@ -59,7 +59,7 @@ for k=1:tstep
     time = k*dt;
 
     % Print and plot diagnositics every 100 time-steps
-    if 0 %(mod(k,100)==0)
+    if (mod(k,100)==0)
         fprintf('time %f, step %i out of %i\n',time,k,tstep)
 
         figure(1);        
