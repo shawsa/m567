@@ -8,7 +8,7 @@
 % Which we abbreviate as GGS82
 
 % Reynolds number.  Re=100, 400, 1000 are the options for comparisons.
-Re = 100; 
+Re = 400; 
 
 % Contour levels for plotting the stream function to compare GGS82.
 cntrs = [-1e-10 -1e-7 -1e-5 -1e-4 -1e-2 -3e-2 -5e-2 -7e-2 -9e-2 -0.1 -0.11 -0.115 -0.1175];
@@ -59,7 +59,7 @@ for k=1:tstep
     time = k*dt;
 
     % Print and plot diagnositics every 100 time-steps
-    if (mod(k,100)==0)
+    if 0 %(mod(k,100)==0)
         fprintf('time %f, step %i out of %i\n',time,k,tstep)
 
         figure(1);        
@@ -91,7 +91,6 @@ for k=1:tstep
         fprintf('Max velocity=%1.4e, Error at boundary=%1.4e, Convergence=%1.4e, %1.4e\n',maxvel,errUBndry,convSf,convU);
     end
 end
-
 %%  Compare to the GGS82 and MSA09 results
 
 % Generate the grid of values (with ghost points) for u-velocity
